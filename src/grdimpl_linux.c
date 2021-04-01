@@ -34,7 +34,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h> /* for PATH_MAX */
-#include <stdio.h> /* for snprintf */
+#include <stdio.h>  /* for snprintf */
 #include <linux/usbdevice_fs.h>
 #include <linux/hiddev.h>
 #include "grdimpl.h"
@@ -61,8 +61,7 @@ static int create_lock_path(const char* dev_path, char* buf, size_t buf_size)
     const char* name_prefix;
     const char* slash;
     int ret;
-    size_t len, i;
-    unsigned int magic_num = 0;
+    size_t len, i, magic_num = 0;
 
     name_prefix = getenv(GRD_IPC_NAME_ENV);
     if (!name_prefix)
@@ -83,7 +82,7 @@ static int create_lock_path(const char* dev_path, char* buf, size_t buf_size)
 
     assert(buf);
     assert(name_prefix);
-    ret = snprintf(buf, buf_size, "%s%sgrd%02u.lock", name_prefix, slash, magic_num);
+    ret = snprintf(buf, buf_size, "%s%sgrd%02d.lock", name_prefix, slash, magic_num);
     assert(ret > 0  &&  (size_t)ret < buf_size);
     if (ret > 0  &&  (size_t)ret < buf_size)
         return 0;
@@ -120,7 +119,7 @@ static int open_device(const char* dev_path, struct lock_descr* lock_dscr)
 
     mode = umask(0);
     fd = open(lock_path, O_RDWR | O_CREAT,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     umask(mode);
     if (fd >= 0)
     {
@@ -134,8 +133,8 @@ static int open_device(const char* dev_path, struct lock_descr* lock_dscr)
          * (for synchronization libgrdapi.a and grdwine.dll.so)
          */
         while ((ret = fcntl(fd, F_SETLKW, &lock)) == -1
-                && (errno == EDEADLK || errno == EINTR || errno == ENOLCK)
-        )
+               && (errno == EDEADLK || errno == EINTR || errno == ENOLCK)
+               )
             sleep(1);
         if (ret != 0)
         {
@@ -227,7 +226,7 @@ static int hiddevice_write(int fd, void* buf, size_t len)
         ref.uref.usage_code = 0xffa00004;
         ref.uref.value = 0;
         ref.num_values = report_len;
-        assert(sizeof(ref.values)/sizeof(ref.values[0]) >= ref.num_values);
+        assert(sizeof(ref.values) / sizeof(ref.values[0]) >= ref.num_values);
         for (i = 0; i < ref.num_values; ++i)
             if (!buf)
                 ref.values[i] = 0;
@@ -294,13 +293,13 @@ static int hiddevice_read(int fd, void* buf, size_t len)
         ref.uref.usage_code = 0xffa00003;
         ref.uref.value = 0;
         ref.num_values = report_len;
-        assert(sizeof(ref.values)/sizeof(ref.values[0]) >= ref.num_values);
+        assert(sizeof(ref.values) / sizeof(ref.values[0]) >= ref.num_values);
         if (ioctl(fd, HIDIOCGUSAGES, &ref) != 0)
             return -1;
 
         assert(buf);
         assert(ref.num_values == report_len);
-        assert(sizeof(ref.values)/sizeof(ref.values[0]) >= ref.num_values);
+        assert(sizeof(ref.values) / sizeof(ref.values[0]) >= ref.num_values);
         for (i = 0; i < ref.num_values; ++i)
             ((unsigned char*)buf)[i + report_len * n] = (unsigned char)ref.values[i];
     }
@@ -308,7 +307,7 @@ static int hiddevice_read(int fd, void* buf, size_t len)
 }
 
 int grd_ioctl_device(const char* dev_path, unsigned int prod_id, size_t pack_size,
-        void* in, size_t len_in, void* out, size_t len_out)
+                     void* in, size_t len_in, void* out, size_t len_out)
 {
     const int ishid = (prod_id == GRD_PRODID_S3S_HID || prod_id == GRD_PRODID_S3C_HID);
     struct lock_descr lock;
@@ -323,8 +322,8 @@ int grd_ioctl_device(const char* dev_path, unsigned int prod_id, size_t pack_siz
 
     assert(fd >= 0);
     if ((!ishid && ioctl(fd, USBDEVFS_CLAIMINTERFACE, &interface) == 0)
-            ||  (ishid && ioctl(fd, HIDIOCSFLAG, &flags) == 0)
-    )
+        ||  (ishid && ioctl(fd, HIDIOCSFLAG, &flags) == 0)
+        )
     {
         assert(pack_size > 0);
         assert(len_out % pack_size == 0);
@@ -352,8 +351,8 @@ int grd_ioctl_device(const char* dev_path, unsigned int prod_id, size_t pack_siz
             }
             /* read the latest pack after the last written pack */
             if ((len_in == pack_size && len_out < pack_size)
-                    || len_in > pack_size
-            )
+                || len_in > pack_size
+                )
             {
                 /* read */
                 assert(in);
@@ -479,7 +478,7 @@ static int load_usbfs_path(char* buf, size_t size)
 }
 
 static size_t search_usbfs_devices(const char* usbfs_path,
-        search_usb_device_callback callback, void* param)
+                                   search_usb_device_callback callback, void* param)
 {
     DIR* dir_bus;
     DIR* dir_dev;
@@ -497,7 +496,7 @@ static size_t search_usbfs_devices(const char* usbfs_path,
             continue;
 
         ret = snprintf(dev_path, sizeof(dev_path), "%s/%s",
-                usbfs_path, entry_bus->d_name);
+                       usbfs_path, entry_bus->d_name);
         assert(ret > 0  &&  (size_t)ret < sizeof(dev_path));
         if (ret < 0  ||  (size_t)ret >= sizeof(dev_path))
             continue;
@@ -509,7 +508,7 @@ static size_t search_usbfs_devices(const char* usbfs_path,
                 continue;
 
             ret = snprintf(dev_path, sizeof(dev_path), "%s/%s/%s",
-                    usbfs_path, entry_bus->d_name, entry_dev->d_name);
+                           usbfs_path, entry_bus->d_name, entry_dev->d_name);
 
             assert(ret > 0  &&  (size_t)ret < sizeof(dev_path));
             if (ret < 0  ||  (size_t)ret >= sizeof(dev_path))
@@ -537,7 +536,7 @@ static size_t search_grdhid_devices(search_usb_device_callback callback, void* p
     for (i = 0; i < GRDHID_MAX_COUNT; ++i)
     {
         ret = snprintf(dev_path, sizeof(dev_path), "%s%d",
-                GRDHID_PATH_HEAD, (unsigned int)i);
+                       GRDHID_PATH_HEAD, i);
         assert(ret > 0  &&  (size_t)ret < sizeof(dev_path));
         if (ret < 0  ||  (size_t)ret >= sizeof(dev_path))
             continue;

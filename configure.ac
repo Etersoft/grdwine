@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([GrdWine],[0.5.4],[hotline@guardant.ru])
+AC_INIT([GrdWine],[0.5.5],[hotline@guardant.ru])
 AC_CONFIG_SRCDIR([src/grdwine.c])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE

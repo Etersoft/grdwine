@@ -26,14 +26,14 @@
 #include <stddef.h>
 #endif /* HAVE_STDDEF_H */
 
-typedef int __attribute__((__cdecl__))
+typedef int __attribute__((ms_abi))
     (*search_usb_device_callback)(const char* path, void* param);
 
 /*
  * Communication to device (which grd_probe_device returned zero).
  */
 int grd_ioctl_device(const char* dev_path, unsigned int prod_id,
-        size_t pack_size, void* in, size_t len_in, void* out, size_t len_out);
+                     size_t pack_size, void* in, size_t len_in, void* out, size_t len_out);
 
 /*
  * Check device.

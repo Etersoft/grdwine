@@ -35,7 +35,7 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(grdwine);
 
-typedef BOOL (CDECL *GrdWine_SearchUsbDevices_Callback)(LPCSTR lpDevName, LPVOID lpParam);
+typedef BOOL (__attribute__((ms_abi)) * GrdWine_SearchUsbDevices_Callback)(LPCSTR lpDevName, LPVOID lpParam);
 
 DWORD WINAPI GrdWine_GetVersion()
 {
@@ -78,10 +78,10 @@ BOOL WINAPI GrdWine_DeviceProbe(LPCSTR lpDevName, LPDWORD pProdId)
 }
 
 BOOL WINAPI GrdWine_DeviceIoctl(LPCSTR lpDevName, DWORD ProdId, DWORD dwPackSize,
-        LPVOID lpIn, DWORD nInSize, LPVOID lpOut, DWORD nOutSize)
+                                LPVOID lpIn, DWORD nInSize, LPVOID lpOut, DWORD nOutSize)
 {
-    char *path = (char*)lpDevName;
-    void *in = lpIn, *out = lpOut;
+    char* path = (char*)lpDevName;
+    void* in = lpIn, * out = lpOut;
     size_t in_size = (size_t)nInSize, out_size = (size_t)nOutSize;
     size_t pack_size = (size_t)dwPackSize;
     unsigned int prod_id = (unsigned int)ProdId;
@@ -92,7 +92,7 @@ BOOL WINAPI GrdWine_DeviceIoctl(LPCSTR lpDevName, DWORD ProdId, DWORD dwPackSize
         return FALSE;
 
     TRACE("Call grd_ioctl_device(%s, %u, %u, %p, %u, %p, %u)\n",
-            path, prod_id, (unsigned int)pack_size, in, (unsigned int)in_size, out, (unsigned int)out_size);
+          path, prod_id, pack_size, in, in_size, out, out_size);
     ret = grd_ioctl_device(path, prod_id, pack_size, in, in_size, out, out_size);
     TRACE("Ret grd_ioctl_device %d\n", ret);
 
@@ -105,12 +105,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
     switch (fdwReason)
     {
-        case DLL_WINE_PREATTACH:
-            return FALSE; /* prefer native version */
+    case DLL_WINE_PREATTACH:
+        return FALSE;     /* prefer native version */
 
-        case DLL_PROCESS_ATTACH:
-            DisableThreadLibraryCalls(hinstDLL);
-            break;
+    case DLL_PROCESS_ATTACH:
+        DisableThreadLibraryCalls(hinstDLL);
+        break;
     }
     return TRUE;
 }
